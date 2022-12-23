@@ -105,7 +105,10 @@ behind inter instance communication.
 
 Currently, it's only possible to run it in a single process environment. But implementation with
 a multi process environment is planned as it's the whole point of this project. It's just that
-the simple implementation is simpler to implement obviously.
+the simple implementation is simpler to implement obviously. What's important is that while
+this library will handle certain use cases. It is developped in mind that it would be integrated
+in an application instead of having an application integrated into wsapp. 
+It is expected that the interfaces can be implemented to suit your needs.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
