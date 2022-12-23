@@ -22,31 +22,29 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
 
 
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <a href="https://github.com/llacroix/wsapp">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">project_title</h3>
+<h3 align="center">WSApp</h3>
 
   <p align="center">
-    project_description
+    Scalable WebSocket Application
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/llacroix/wsapp"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://github.com/llacroix/wsapp/tree/main/examples">View Demo</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Report Bug</a>
+    <a href="https://github.com/llacroix/wsapp/issues">Report Bug</a>
     ·
-    <a href="https://github.com/github_username/repo_name/issues">Request Feature</a>
+    <a href="https://github.com/llacroix/wsapp/issues">Request Feature</a>
   </p>
 </div>
 
@@ -65,7 +63,6 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
@@ -74,7 +71,9 @@
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
+    <!--
     <li><a href="#acknowledgments">Acknowledgments</a></li>
+    -->
   </ol>
 </details>
 
@@ -83,9 +82,30 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+<!--
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
+-->
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`
+WSApp is a library that may helps making scalable websocket application by abstracting
+the websocket out of your application. It is highly inspired by AWS GatewayAPI for WebSocket
+application.
+
+What this projects attempt to solve is to remove the websocket states from your application.
+A simple implementation of websockets binds the websocket server to the http endpoint. In other
+words, the application server becomes a manager of connection, websocket message dispatching etc.
+
+The downside of this architecture is that it's not scalable. Since the software expect to receive
+all connections on a single process. It means that if you had multiple websocket servers, the
+connections on one instance wouldn't be able to communicate with the connections of an other
+instance.
+
+This library helps you design a websocket service that can be scaled and can dispatch request in
+a multi process environment. The API of the connection manager would abstract the complexity
+behind inter instance communication.
+
+Currently, it's only possible to run it in a single process environment. But implementation with
+a multi process environment is planned as it's the whole point of this project. It's just that
+the simple implementation is simpler to implement obviously.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -172,7 +192,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Loïc Faure-Lacroix - [@llacroix](https://twitter.com/llacroix) - lamerstar@gmail.com
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/llacroix/wsapp](https://github.com/llacroix/wsapp)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
