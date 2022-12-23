@@ -94,13 +94,6 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
 ### Built With
 
 * [![AioHTTP][AioHttp]][AioHttp-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -185,5 +178,13 @@ Project Link: [https://github.com/github_username/repo_name](https://github.com/
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/llacroix/wsapp.svg?style=for-the-badge
+[contributors-url]: https://github.com/llacroix/wsapp/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/llacroix/wsapp.svg?style=for-the-badge
+[forks-url]: https://github.com/llacroix/wsapp/network/members
+[stars-shield]: https://img.shields.io/github/stars/llacroix/wsapp.svg?style=for-the-badge
+[stars-url]: https://github.com/llacroix/wsapp/stargazers
+[issues-shield]: https://img.shields.io/github/issues/llacroix/wsapp.svg?style=for-the-badge
+[issues-url]: https://github.com/llacroix/wsapp/issues
 [AioHttp]: https://img.shields.io/badge/aiohttp-35495E?style=for-the-badge&logo=aiohttp&logoColor=4FC08D
 [AioHttp-url]: https://docs.aiohttp.org/en/stable/
