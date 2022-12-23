@@ -11,7 +11,7 @@ class LocalConnection(Connection):
 
     @property
     def id(self):
-        return self.uuid
+        return self.connection_id
 
 
 
@@ -49,14 +49,15 @@ class LocalConnectionManager(ConnectionManager):
         self.connections = {}
 
     def make_connection(self, socket):
-        return LocalConnection(socket)
+        uuid = self.new_connection_id()
+        connection = LocalConnection(socket, connection_id=uuid)
+        return connection
 
-    def new_uuid(self, connection):
-        return uuid.uuid1()        
+    def new_connection_id(self):
+        return uuid.uuid1().hex
 
-    def add_connection(self, connection):
-        connection.uuid = self.new_uuid(connection)
-        self.connections[connection.uuid] = connection
+    async def add_connection(self, connection):
+        self.connections[connection.id] = connection
 
-    def get(self, connection_id):
+    async def get(self, connection_id):
         return self.connections.get(connection_id)

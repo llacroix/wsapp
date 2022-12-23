@@ -34,7 +34,7 @@ async def disconnect(app, event):
 @handlers.define("$default")
 async def default_handler(app, event):
     logger.info("On Default %s", event)
-    conn = connections.get(event['requestContext']['connectionId'])
+    conn = await connections.get(event['requestContext']['connectionId'])
     logger.info("Connection %s", conn)
     await conn.send(event['body'])
 

@@ -15,7 +15,7 @@ class AIOHttpHandler(object):
             await ws.prepare(request)
 
             connection = self.app.connection_manager.make_connection(ws)
-            self.app.connection_manager.add_connection(connection)
+            await self.app.connection_manager.add_connection(connection)
 
             # Connect event
             handler = self.app.handler_manager.get('$connect')
@@ -47,19 +47,19 @@ class AIOHttpHandler(object):
     def connections_handler(self):
         async def connections_handler(request):
             data = await request.json()
-            connectionId = request.match_info['connection_id']
+            connection_id = request.match_info['connection_id']
 
-            connection = self.app.connection_manager.get(connection_id)
+            connection = await self.app.connection_manager.get(connection_id)
 
             if connection:
-                message = self.app.event_manager.make_message(data)
+                # message = self.app.event_manager.make_message(data)
 
                 try:
-                    await connection.send(message)
+                    await connection.send(data)
                 except Exception as exc:
                     pass
 
-            return web.Response("")
+            return web.json_response({})
 
         return connections_handler
 

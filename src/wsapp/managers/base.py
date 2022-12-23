@@ -10,13 +10,13 @@ class BaseManager(object):
 
 class ConnectionManager(object):
 
-    def add_connection(self, connection):
+    async def add_connection(self, connection):
         raise NotImplementedError()
 
-    def new_uuid(self, connection):
+    def new_connection_id(self):
         raise NotImplementedError()
 
-    def get(self, connection_id):
+    async def get(self, connection_id):
         raise NotImplementedError()
 
 
