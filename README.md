@@ -154,6 +154,7 @@ _For more examples, please refer to the [Documentation](https://wsapp.readthedoc
 ## Roadmap
 
 - [x] Add simple local managers and aiohttp integration
+- [x] Added examples of a clustered websocket integration with 1 connections service 
 - [ ] Add handler manager with http backend
 - [ ] Make scalable integration
 	- [ ] Add a connection manager service with customizable backend
