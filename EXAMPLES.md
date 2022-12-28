@@ -44,3 +44,8 @@ a websocket.
 With this kind of implementation, it is possible to create a websocket frontend for servers that do
 not support websocket or async in any way. As long as you can create an HTTP Endpoint or possibly 
 a message queue... It is possible to add websocket to virtually any kind of application.
+
+
+    python example/conn.py # connection server on http://localhost:8004
+    python example/remote_handlers.py -p 8000 http://localhost:8004
+    python example/remote_handlers.py -p 8001 http://localhost:8004
