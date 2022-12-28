@@ -1,4 +1,4 @@
-from .base import EndpointManager, ConnectionManager
+from .base import ConnectionManager
 from .local import LocalConnectionManager
 from ..objects import Connection
 

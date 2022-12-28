@@ -59,30 +59,40 @@ class EventManager(object):
 
 class HandlerManager(object):
 
-    def __init__(self):
-        self.handlers = []
+    def __init__(self, route_expression=None):
+        self.handlers = {}
         self.base_handlers = {}
+        self.route_expression = route_expression
 
     def get(self, key):
         if key in self.base_handlers:
             return self.base_handlers[key]
         else:
-            for name, handler in self.handlers:
+            for name, handler in self.handlers.items():
                 if key == name:
                     return handler
 
     def add_handler(self, handler, key=None):
+        if key is None:
+            key = handler.name
+
         if key in ['$connect', '$disconnect', '$default']:
             self.base_handlers[handler.name] = handler
         else:
-            self.handlers.append(handler)
+            self.handlers[handler.name] = handler
 
     def add_handlers(self, handler_map):
         for key, handler in handler_map.items():
             self.add_handler(handler)
 
     def get_handler(self, event):
-        for key, handler in self.handlers:
+        if self.route_expression:
+            route_key = self.route_expression.format(request=event)
+            if route_key in self.handlers:
+                event['requestContext']['routeKey'] = route_key
+                return self.handlers[route_key]
+
+        for key, handler in self.handlers.items():
             if handler.accept(event):
                 event['requestContext']['routeKey'] = key
                 return handler

@@ -53,7 +53,7 @@ async def make_service(ws_endpoint, remote_connections):
             "Default handler with Connection %s on Event: %s", conn, event
         )
 
-    @handler_map.define("action.fun")
+    # @handler_map.define("action.fun")
     async def action_fun(app, event):
         logger.info("In app fun")
 

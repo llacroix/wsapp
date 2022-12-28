@@ -1,11 +1,6 @@
 import uuid
 from ..objects import Connection
-from .handlers.remote import BasicHandler
-
-from .base import (
-    EndpointManager,
-    ConnectionManager
-)
+from .base import ConnectionManager
 
 
 class LocalConnection(Connection):

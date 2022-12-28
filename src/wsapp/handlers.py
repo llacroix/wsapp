@@ -1,14 +1,14 @@
 import inspect
 
-import asyncio
-from .base import Handler
-
 
 class Handler(object):
     def __init__(self, name):
         self.name = name
 
     def call(self, application, event):
+        raise NotImplementedError()
+
+    def accept(self, event):
         raise NotImplementedError()
 
 
@@ -24,6 +24,9 @@ class BasicHandler(Handler):
             return await res
 
         return res
+
+    def accept(self, event):
+        return True
 
 
 class BasicHandlerMap(object):
@@ -60,12 +63,12 @@ class HttpEndpointMap(object):
     async def send(self, path, event):
         url = f"{self.url}{path}"
 
-        async with session.post(url, json=event.to_json()) as req:
+        async with self.session.post(url, json=event.to_json()) as req:
             result = await req.json()
 
         return result
 
     def define(self, name, path):
-        handler = RemoteHandler(name, slf, path)
+        handler = HttpHandler(name, self, path)
         self.handlers[handler.name] = handler
         return handler

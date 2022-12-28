@@ -41,7 +41,7 @@ async def make_service():
     return application
 
 
-async def make_application(ws_endpoint, remote_endpoint):
+async def make_application(ws_endpoint):
     application = await make_service()
 
     webapp = aiohttp.web.Application()
@@ -53,16 +53,15 @@ async def make_application(ws_endpoint, remote_endpoint):
 
 
 @click.command()
-@click.argument('remote_endpoint')
 @click.option('--host', help="Listen Hostname", default='127.0.0.1')
 @click.option('--port', help="Listen Hostname", default=8000, type=int)
-def main(remote_endpoint, host, port):
+def main(host, port):
     logging.basicConfig(level='INFO')
 
     ws_endpoint = f"http://{host}:{port}"
 
     aiohttp.web.run_app(
-        make_application(ws_endpoint, remote_endpoint),
+        make_application(ws_endpoint),
         host=host,
         port=port
     )
