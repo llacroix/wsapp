@@ -19,18 +19,20 @@ async def make_service(http_endpoint):
         info = connections.get(connection_id)
         return web.json_response(info)
 
+    async def send_message(conn_id, message):
+        info = connections.get(conn_id)
+        host_url = info['host']
+        url = f"{host_url}/@connections/{conn_id}"
+        async with session.post(url, json=message) as resp:
+            return await resp.json()
+
     @routes.post('/@connections/{connection_id}')
     async def post_connection_message(request):
         connection_id = request.match_info['connection_id']
-        info = connections.get(connection_id)
 
         message = await request.json()
 
-        host_url = info['host']
-        url = f"{host_url}/@connections/{connection_id}"
-
-        async with session.post(url, json=message) as resp:
-            await resp.json()
+        await send_message(connection_id, message)
 
         return web.json_response({})
 
@@ -47,10 +49,20 @@ async def make_service(http_endpoint):
 
     @routes.post("/httpws/connect")
     @routes.post("/httpws/disconnect")
-    @routes.post("/httpws/default")
     @routes.post("/httpws/fun")
     async def on_connect(request):
         data = await request.json()
+
+        logger.info("Handlers %s", data)
+
+        return web.json_response({})
+
+    @routes.post("/httpws/default")
+    async def on_default(request):
+        data = await request.json()
+
+        if 'conn_id' in data['body']:
+            await send_message(data['body']['conn_id'], data['body'])
 
         logger.info("Handlers %s", data)
 

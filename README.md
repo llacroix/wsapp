@@ -155,10 +155,10 @@ _For more examples, please refer to the [Documentation](https://wsapp.readthedoc
 
 - [x] Add simple local managers and aiohttp integration
 - [x] Added examples of a clustered websocket integration with 1 connections service 
-- [ ] Add handler manager with http backend
+- [x] Add handler manager with http backend
 - [ ] Make scalable integration
 	- [ ] Add a connection manager service with customizable backend
-	- [ ] Add integration with the remote connection manager service
+	- [x] Add integration with the remote connection manager service
 
 See the [open issues](https://github.com/llacroix/wsapp/issues) for a full list of proposed features (and known issues).
 
