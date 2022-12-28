@@ -2,47 +2,50 @@ import click
 import logging
 import aiohttp
 
-from wsapp.managers.base import EventManager, HandlerManager
-from wsapp.handlers import BasicHandlerMap
-from wsapp.managers.local import (
-    LocalConnectionManager,
+from wsapp.managers.base import EventManager
+from wsapp.handlers import HttpHandlerMap
+from wsapp.managers.base import HandlerManager
+from wsapp.managers.remote import (
+    RemotedConnectionManager,
+    ConnectionEndpoint
 )
 from wsapp.app import WebsocketApplication
+
 from wsapp.plugins.aiohttp import AIOHttpHandler
 
 
 logger = logging.getLogger(__name__)
 
 
-async def make_service():
-    handler_map = BasicHandlerMap()
+async def make_service(ws_endpoint, remote_connections):
+    session = aiohttp.ClientSession()
+    conn_endpoint = ConnectionEndpoint(
+        ws_endpoint,
+        remote_connections,
+        session
+    )
 
-    @handler_map.define('$connect')
-    async def connect(app, event):
-        logger.info("On connect %s", event)
+    connections = RemotedConnectionManager(conn_endpoint)
 
-    @handler_map.define("$disconnect")
-    async def disconnect(app, event):
-        logger.info("On Disconnect %s", event)
+    handler_map = HttpHandlerMap(ws_endpoint, session)
 
-    @handler_map.define("$default")
-    async def default_handler(app, event):
-        logger.info("On Default %s", event)
-        conn = await connections.get(event['requestContext']['connectionId'])
-        logger.info("Connection %s", conn)
-        await conn.send(event['body'])
+    handler_map.define("$connect", "/httpws/connect")
+    handler_map.define("$disconnect", "/httpws/disconnect")
+    handler_map.define("$default", "/httpws/default")
+    handler_map.define("action.fun", "/httpws/fun")
 
     handlers = HandlerManager()
-    events = EventManager()
-    connections = LocalConnectionManager()
     handlers.add_handlers(handler_map)
 
+    events = EventManager()
+
     application = WebsocketApplication(connections, handlers, events)
+
     return application
 
 
 async def make_application(ws_endpoint, remote_endpoint):
-    application = await make_service()
+    application = await make_service(ws_endpoint, remote_endpoint)
 
     webapp = aiohttp.web.Application()
     wsapp = AIOHttpHandler(application)

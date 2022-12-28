@@ -3,10 +3,8 @@ import logging
 import aiohttp
 
 from wsapp.managers.base import EventManager
-from wsapp.managers.local import (
-    LocalConnectionManager,
-    LocalEndpointManager
-)
+from wsapp.handlers import BasicHandlerMap
+from wsapp.managers.base import HandlerManager
 from wsapp.managers.remote import (
     RemotedConnectionManager,
     ConnectionEndpoint
@@ -20,25 +18,25 @@ logger = logging.getLogger(__name__)
 
 
 async def make_service(ws_endpoint, remote_connections):
-    conn_endpoint = ConnectionEndpoint(ws_endpoint, remote_connections)
-
-    handlers = LocalEndpointManager()
-    events = EventManager()
+    session = aiohttp.ClientSession()
+    conn_endpoint = ConnectionEndpoint(
+        ws_endpoint,
+        remote_connections,
+        session
+    )
     connections = RemotedConnectionManager(conn_endpoint)
 
-    application = WebsocketApplication(connections, handlers, events)
+    handler_map = BasicHandlerMap()
 
-    @handlers.define('$connect')
+    @handler_map.define('$connect')
     async def connect(app, event):
         logger.info("On connect %s", event)
 
-
-    @handlers.define("$disconnect")
+    @handler_map.define("$disconnect")
     async def disconnect(app, event):
         logger.info("On Disconnect %s", event)
 
-
-    @handlers.define("$default")
+    @handler_map.define("$default")
     async def default_handler(app, event):
         if 'connectionId' in event['body']:
             # Attempt to send a message to a specified connection id
@@ -51,7 +49,20 @@ async def make_service(ws_endpoint, remote_connections):
         if conn:
             await conn.send(event['body'])
 
-        logger.info("Default handler with Connection %s on Event: %s", conn, event)
+        logger.info(
+            "Default handler with Connection %s on Event: %s", conn, event
+        )
+
+    @handler_map.define("action.fun")
+    async def action_fun(app, event):
+        logger.info("In app fun")
+
+    handlers = HandlerManager()
+    handlers.add_handlers(handler_map)
+
+    events = EventManager()
+
+    application = WebsocketApplication(connections, handlers, events)
 
     return application
 
@@ -81,6 +92,7 @@ def main(remote_endpoint, host, port):
         host=host,
         port=port
     )
+
 
 if __name__ == '__main__':
     main()

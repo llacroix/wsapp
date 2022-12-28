@@ -21,7 +21,7 @@ class AIOHttpHandler(object):
             handler = self.app.handler_manager.get('$connect')
             if handler:
                 event = self.app.event_manager.make_connect_event(connection)
-                await handler(self, event)
+                await handler.call(self, event)
 
             # Messages
             async for msg in ws:
@@ -29,7 +29,7 @@ class AIOHttpHandler(object):
                     event = self.app.event_manager.make_event(connection, msg)
                     handler = self.app.handler_manager.get_handler(event)
                     if handler:
-                        await handler(self, event)
+                        await handler.call(self, event)
                 except Exception as exc:
                     logger.info("Something went wrong", exc_info=True)
 
@@ -40,7 +40,7 @@ class AIOHttpHandler(object):
             handler = self.app.handler_manager.get('$disconnect')
             if handler:
                 event = self.app.event_manager.make_disconnect_event(connection)
-                await handler(self, event)
+                await handler.call(self, event)
 
         return websocket_handler
 

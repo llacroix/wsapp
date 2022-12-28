@@ -57,15 +57,35 @@ class EventManager(object):
         return event
 
 
-class EndpointManager(object):
+class HandlerManager(object):
+
+    def __init__(self):
+        self.handlers = []
+        self.base_handlers = {}
+
+    def get(self, key):
+        if key in self.base_handlers:
+            return self.base_handlers[key]
+        else:
+            for name, handler in self.handlers:
+                if key == name:
+                    return handler
+
     def add_handler(self, handler, key=None):
-        raise NotImplementedError()
+        if key in ['$connect', '$disconnect', '$default']:
+            self.base_handlers[handler.name] = handler
+        else:
+            self.handlers.append(handler)
+
+    def add_handlers(self, handler_map):
+        for key, handler in handler_map.items():
+            self.add_handler(handler)
 
     def get_handler(self, event):
-        raise NotImplementedError()
-
-    def define(self, key):
-        def decorator(handler):
-            self.add_handler(handler, key)
-            return handler
-        return decorator
+        for key, handler in self.handlers:
+            if handler.accept(event):
+                event['requestContext']['routeKey'] = key
+                return handler
+        else:
+            event['requestContext']['routeKey'] = '$default'
+            return self.base_handlers['$default']

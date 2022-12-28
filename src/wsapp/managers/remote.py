@@ -1,12 +1,11 @@
-from aiohttp import ClientSession
 from .base import EndpointManager, ConnectionManager
 from .local import LocalConnectionManager
 from ..objects import Connection
 
 
 class ConnectionEndpoint(object):
-    def __init__(self, ws_url, url, session_constructor=ClientSession):
-        self.session = session_constructor()
+    def __init__(self, ws_url, url, session):
+        self.session = session
         self.ws_url = ws_url
         self.url = url
 
