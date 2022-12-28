@@ -45,6 +45,17 @@ async def make_service(http_endpoint):
 
         return web.json_response({})
 
+    @routes.post("/httpws/connect")
+    @routes.post("/httpws/disconnect")
+    @routes.post("/httpws/default")
+    @routes.post("/httpws/fun")
+    async def on_connect(request):
+        data = await request.json()
+
+        logger.info("Handlers %s", data)
+
+        return web.json_response({})
+
     return routes
 
 

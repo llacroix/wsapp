@@ -53,8 +53,11 @@ class HttpHandler(Handler):
     async def call(self, application, event):
         await self.endpoint.send(self.path, event)
 
+    def accept(self, event):
+        return True
 
-class HttpEndpointMap(object):
+
+class HttpHandlerMap(object):
     def __init__(self, url, session):
         self.url = url
         self.session = session
@@ -63,7 +66,7 @@ class HttpEndpointMap(object):
     async def send(self, path, event):
         url = f"{self.url}{path}"
 
-        async with self.session.post(url, json=event.to_json()) as req:
+        async with self.session.post(url, json=event) as req:
             result = await req.json()
 
         return result
@@ -72,3 +75,6 @@ class HttpEndpointMap(object):
         handler = HttpHandler(name, self, path)
         self.handlers[handler.name] = handler
         return handler
+
+    def items(self):
+        return self.handlers.items()

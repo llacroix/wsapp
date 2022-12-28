@@ -8,6 +8,7 @@ class BaseManager(object):
     def register(self, app):
         self.app = app
 
+
 class ConnectionManager(object):
 
     async def add_connection(self, connection):

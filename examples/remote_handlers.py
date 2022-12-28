@@ -17,17 +17,17 @@ from wsapp.plugins.aiohttp import AIOHttpHandler
 logger = logging.getLogger(__name__)
 
 
-async def make_service(ws_endpoint, remote_connections):
+async def make_service(ws_endpoint, remote_endpoint):
     session = aiohttp.ClientSession()
     conn_endpoint = ConnectionEndpoint(
         ws_endpoint,
-        remote_connections,
+        remote_endpoint,
         session
     )
 
     connections = RemotedConnectionManager(conn_endpoint)
 
-    handler_map = HttpHandlerMap(ws_endpoint, session)
+    handler_map = HttpHandlerMap(remote_endpoint, session)
 
     handler_map.define("$connect", "/httpws/connect")
     handler_map.define("$disconnect", "/httpws/disconnect")
