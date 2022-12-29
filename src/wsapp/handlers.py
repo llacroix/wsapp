@@ -68,8 +68,8 @@ class HttpHandler(Handler):
 
 
 class HttpHandlerMap(HandlerMap):
-    def __init__(self, url, session):
-        self.endpoint = HttpEndpoint(url, session)
+    def __init__(self, endpoint: HttpEndpoint):
+        self.endpoint = endpoint
         self.handlers = {}
 
     def define(self, name, path):

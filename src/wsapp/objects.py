@@ -14,7 +14,7 @@ class Connection(object):
             self,
             socket,
             connection_id=None,
-            timeout=1*60,
+            timeout=5*60,
             connected_at=None
     ):
         self.id = connection_id

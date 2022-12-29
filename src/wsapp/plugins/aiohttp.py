@@ -1,3 +1,4 @@
+import asyncio
 from aiohttp import web
 from aiohttp.web import WebSocketResponse
 import logging
@@ -13,6 +14,19 @@ class AIOHttpHandler(object):
         """
         Define main websocket loop for aiohttp server.
         """
+
+        async def process_messages(connection):
+            async for msg in connection.socket:
+                event = self.app.event_manager.make_event(connection, msg)
+
+                handler = self.app.handler_manager.get_handler(event)
+                if handler:
+                    await handler.call(self, event)
+
+                # lazy way to expire a socket
+                if connection.timed_out:
+                    break
+
         async def websocket_handler(request):
             ws = WebSocketResponse()
             await ws.prepare(request)
@@ -29,18 +43,14 @@ class AIOHttpHandler(object):
                 )
                 await handler.call(self, event)
 
-            # TODO break out of the loop when timeout is reached.
-            # Messages
-            async for msg in ws:
-                event = self.app.event_manager.make_event(connection, msg)
-
-                handler = self.app.handler_manager.get_handler(event)
-                if handler:
-                    await handler.call(self, event)
-
-                # lazy way to expire a socket
-                if connection.timed_out:
-                    break
+            # Process messages
+            try:
+                await asyncio.wait_for(
+                    process_messages(connection),
+                    connection.timeout
+                )
+            except asyncio.TimeoutError:
+                pass
 
             # Disconnect event
             handler = self.app.handler_manager.get('$disconnect')

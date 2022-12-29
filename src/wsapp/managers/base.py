@@ -1,4 +1,5 @@
 import time
+from collections import defaultdict
 from ..handlers import Handler, HandlerMap
 from ..objects import Connection
 from typing import Optional, Mapping, Any
@@ -71,6 +72,17 @@ class DictAttr(dict):
             return val
 
 
+def flatten_multidict(values):
+    acc = defaultdict(list)
+    for key, value in values.items():
+        acc[key].append(value)
+
+    return {
+        key: ",".join(value)
+        for key, value in acc.items()
+    }
+
+
 class EventManager(object):
     """
     A structure that has for purpose to create Event object relevant
@@ -107,11 +119,13 @@ class EventManager(object):
                 "connectedAt": connection.connected_at,
                 "requestTimeEpoch": time.perf_counter()
             },
+            "headers": {},
+            "queryStringParameters": {},
             "body": {}
         }
 
         if route_key is not None:
-            event['requestContext']['routeKey'] = route_key
+            event['routeKey'] = route_key
 
         return DictAttr(event)
 
@@ -120,6 +134,10 @@ class EventManager(object):
             connection,
             route_key='$connect'
         )
+
+        event["headers"] = flatten_multidict(request.headers)
+        event['queryStringParameters'] = flatten_multidict(request.query)
+
         return DictAttr(event)
 
     def compute_route_key(self, event):
@@ -142,7 +160,7 @@ class EventManager(object):
         )
         event['body'] = message.json()
 
-        event['requestContext']['routeKey'] = self.compute_route_key(event)
+        event['routeKey'] = self.compute_route_key(event)
 
         return DictAttr(event)
 
@@ -183,7 +201,7 @@ class HandlerManager(object):
             self.add_handler(handler)
 
     def get_handler(self, event: Mapping[str, Any]):
-        route_key = event['requestContext']['routeKey']
+        route_key = event['routeKey']
 
         handler = (
             self.handlers.get(route_key)

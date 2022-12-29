@@ -36,6 +36,15 @@ async def make_service(http_endpoint):
 
         return web.json_response({})
 
+    @routes.delete('/@connections/{connection_id}')
+    async def delete_connection_message(request):
+        connection_id = request.match_info['connection_id']
+
+        if connection_id in connections:
+            del connections[connection_id]
+
+        return web.json_response({})
+
     @routes.post('/@connections')
     async def new_connection(request):
         data = await request.json()

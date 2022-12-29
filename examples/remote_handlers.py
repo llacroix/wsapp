@@ -3,7 +3,7 @@ import logging
 import aiohttp
 
 from wsapp.managers.base import EventManager
-from wsapp.handlers import HttpHandlerMap
+from wsapp.handlers import HttpHandlerMap, HttpEndpoint
 from wsapp.managers.base import HandlerManager
 from wsapp.managers.remote import (
     RemotedConnectionManager,
@@ -27,7 +27,9 @@ async def make_service(ws_endpoint, remote_endpoint):
 
     connections = RemotedConnectionManager(conn_endpoint)
 
-    handler_map = HttpHandlerMap(remote_endpoint, session)
+    http_endpoint = HttpEndpoint(remote_endpoint, session)
+
+    handler_map = HttpHandlerMap(http_endpoint)
 
     handler_map.define("$connect", "/httpws/connect")
     handler_map.define("$disconnect", "/httpws/disconnect")
