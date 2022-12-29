@@ -10,18 +10,73 @@ class BaseManager(object):
 
 
 class ConnectionManager(object):
+    """
+    An abstract class defining basic methods that needs
+    to be implemented by a connection manager.
 
-    async def add_connection(self, connection):
+    A Connection manager is a special database that can create
+    connection object and put connection object in a database
+    to be used by the current websocket application.
+
+    Here's the life cycle of a connection owned by the websocket
+    service.
+
+    1. A client is connected and a connection is created through:
+       make_connection.
+
+    2. The new connection is then added to the connection manager
+       through `add(conn_id)`.
+
+    3. If the socket connection lives longer than the timeout. It will
+       automatically stop waiting for messages and close the socket.
+
+    4. After the websocket is closed, the connection gets removed
+       from the connection manager with `remove(conn_id)`
+
+
+    At any point, a connection can be obtained using the `get(conn_id)`
+    method. Depending on the implementation, the connection returned
+    could be a local connection or a connection stored somewhere else.
+    """
+
+    def make_connection(self, websocket):
+        """
+        Creates a connection object
+        """
         raise NotImplementedError()
 
-    def new_connection_id(self):
+    async def add(self, connection):
         raise NotImplementedError()
 
     async def get(self, connection_id):
         raise NotImplementedError()
 
+    async def remove(self, connection):
+        raise NotImplementedError()
+
 
 class EventManager(object):
+    """
+    A structure that has for purpose to create Event object relevant
+    to the circumstances. There are default events that aren't based
+    on data received.
+
+    Connected Event:
+
+    This type of event may contain information based on the data
+    received in the http request that created the connection.
+
+    Other Events / Default:
+
+    These events are based on the data received from the client and
+    the route being used to handle the event.
+
+    Disconnect Event:
+
+    This type of event isn't based on any message received and at this
+    point. The connection is no longer active. This can be used for cleaning
+    up things.
+    """
     def make_default_event(self, connection, route_key=None):
         event = {
             "requestContext": {
@@ -31,8 +86,10 @@ class EventManager(object):
             },
             "body": {}
         }
+
         if route_key is not None:
-            event['requestContext']['routeKey'] = '$connect'
+            event['requestContext']['routeKey'] = route_key
+
         return event
 
     def make_connect_event(self, connection):

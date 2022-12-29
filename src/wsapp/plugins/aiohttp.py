@@ -10,37 +10,47 @@ class AIOHttpHandler(object):
         self.app = application
 
     def get_ws_handler(self):
+        """
+        Define main websocket loop for aiohttp server.
+        """
         async def websocket_handler(request):
             ws = WebSocketResponse()
             await ws.prepare(request)
 
             connection = self.app.connection_manager.make_connection(ws)
-            await self.app.connection_manager.add_connection(connection)
+            await self.app.connection_manager.add(connection)
 
             # Connect event
             handler = self.app.handler_manager.get('$connect')
             if handler:
-                event = self.app.event_manager.make_connect_event(connection)
+                event = self.app.event_manager.make_connect_event(
+                    request,
+                    connection
+                )
                 await handler.call(self, event)
 
+            # TODO break out of the loop when timeout is reached.
             # Messages
             async for msg in ws:
-                try:
-                    event = self.app.event_manager.make_event(connection, msg)
-                    handler = self.app.handler_manager.get_handler(event)
-                    if handler:
-                        await handler.call(self, event)
-                except Exception as exc:
-                    logger.info("Something went wrong", exc_info=True)
+                event = self.app.event_manager.make_event(connection, msg)
 
+                handler = self.app.handler_manager.get_handler(event)
+                if handler:
+                    await handler.call(self, event)
+
+                # lazy way to expire a socket
                 if connection.timed_out:
                     break
 
             # Disconnect event
             handler = self.app.handler_manager.get('$disconnect')
             if handler:
-                event = self.app.event_manager.make_disconnect_event(connection)
+                event = self.app.event_manager.make_disconnect_event(
+                    connection
+                )
                 await handler.call(self, event)
+
+            await self.app.connection_manager.remove(connection)
 
         return websocket_handler
 
@@ -56,7 +66,7 @@ class AIOHttpHandler(object):
 
                 try:
                     await connection.send(data)
-                except Exception as exc:
+                except Exception:
                     pass
 
             return web.json_response({})

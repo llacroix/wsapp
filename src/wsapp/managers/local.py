@@ -4,10 +4,7 @@ from .base import ConnectionManager
 
 
 class LocalConnection(Connection):
-
-    @property
-    def id(self):
-        return self.connection_id
+    pass
 
 
 class LocalConnectionManager(ConnectionManager):
@@ -15,15 +12,18 @@ class LocalConnectionManager(ConnectionManager):
         self.connections = {}
 
     def make_connection(self, socket):
-        uuid = self.new_connection_id()
-        connection = LocalConnection(socket, connection_id=uuid)
-        return connection
+        return LocalConnection(socket)
 
     def new_connection_id(self):
         return uuid.uuid1().hex
 
     async def add_connection(self, connection):
+        connection.id = self.new_connection_id()
         self.connections[connection.id] = connection
 
     async def get(self, connection_id):
         return self.connections.get(connection_id)
+
+    async def remove(self, connection):
+        if connection.id in self.connections:
+            del self.connections[connection.id]

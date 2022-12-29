@@ -4,6 +4,10 @@ from ..objects import Connection
 
 
 class ConnectionEndpoint(object):
+    """
+    ConnectionEndpoint is used to communicate with a connection server. This
+    is a basic client without any kind of authentication process.
+    """
     def __init__(self, ws_url, url, session):
         self.session = session
         self.ws_url = ws_url
@@ -41,8 +45,23 @@ class ConnectionEndpoint(object):
         async with self.session.post(url, json=message) as resp:
             await resp.json()
 
+    async def remove_connection(self, connection):
+        url = f"{self.url}/@connections/{connection.id}"
+
+        async with self.session.delete(url) as resp:
+            info = await resp.json()
+
+        return info
+
 
 class RemoteSocket(object):
+    """
+    Socket object that mimmick an object that can send_json
+    to some destination.
+
+    This particular socket is used to send json to an
+    http endpoint based on a specific connection id.
+    """
     def __init__(self, connection_id, endpoint):
         self.connection_id = connection_id
         self.endpoint = endpoint
@@ -74,10 +93,22 @@ class RemotedConnectionManager(LocalConnectionManager):
         if connection_id in self.connections:
             return await super().get(connection_id)
         else:
-            connection = await self.remote_endpoint.get_connection(connection_id)
+            connection = await self.remote_endpoint.get_connection(
+                connection_id
+            )
 
             # TODO add to a cache that purge itself overtime
             if connection.id not in self.remote_connections:
                 self.remote_connections[connection.id] = connection
 
             return connection
+
+    async def remove(self, connection):
+        is_local = connection.id in self.connections
+
+        await super().remove(connection)
+
+        if is_local:
+            await self.remote_endpoint.remove_connection(connection)
+        else:
+            del self.remote_connections[connection.id]
