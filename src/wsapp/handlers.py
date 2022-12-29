@@ -1,4 +1,5 @@
 import inspect
+from typing import Callable, Any
 
 
 class Handler(object):
@@ -9,8 +10,12 @@ class Handler(object):
         raise NotImplementedError()
 
 
+class HandlerMap(object):
+    pass
+
+
 class BasicHandler(Handler):
-    def __init__(self, name, func):
+    def __init__(self, name: str, func: Callable[[Any, Any], None]):
         super().__init__(name)
         self.func = func
 
@@ -23,7 +28,7 @@ class BasicHandler(Handler):
         return res
 
 
-class BasicHandlerMap(object):
+class BasicHandlerMap(HandlerMap):
     def __init__(self):
         self.handlers = {}
 
@@ -38,21 +43,10 @@ class BasicHandlerMap(object):
         return self.handlers.items()
 
 
-class HttpHandler(Handler):
-    def __init__(self, name, endpoint, path):
-        super().__init__(name)
-        self.endpoint = endpoint
-        self.path = path
-
-    async def call(self, application, event):
-        await self.endpoint.send(self.path, event)
-
-
-class HttpHandlerMap(object):
+class HttpEndpoint(object):
     def __init__(self, url, session):
         self.url = url
         self.session = session
-        self.handlers = {}
 
     async def send(self, path, event):
         url = f"{self.url}{path}"
@@ -62,10 +56,29 @@ class HttpHandlerMap(object):
 
         return result
 
+
+class HttpHandler(Handler):
+    def __init__(self, name: str, endpoint: HttpEndpoint, path: str):
+        super().__init__(name)
+        self.endpoint = endpoint
+        self.path = path
+
+    async def call(self, application, event):
+        await self.endpoint.send(self.path, event)
+
+
+class HttpHandlerMap(HandlerMap):
+    def __init__(self, url, session):
+        self.endpoint = HttpEndpoint(url, session)
+        self.handlers = {}
+
     def define(self, name, path):
-        handler = HttpHandler(name, self, path)
+        handler = HttpHandler(name, self.endpoint, path)
         self.handlers[handler.name] = handler
         return handler
+
+    def add(self, handler: HttpHandler):
+        self.handlers[handler.name] = handler
 
     def items(self):
         return self.handlers.items()

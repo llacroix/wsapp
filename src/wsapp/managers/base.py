@@ -1,4 +1,7 @@
 import time
+from ..handlers import Handler, HandlerMap
+from ..objects import Connection
+from typing import Optional, Mapping, Any
 
 
 class BaseManager(object):
@@ -45,13 +48,13 @@ class ConnectionManager(object):
         """
         raise NotImplementedError()
 
-    async def add(self, connection):
+    async def add(self, connection: Connection):
         raise NotImplementedError()
 
-    async def get(self, connection_id):
+    async def get(self, connection_id: str):
         raise NotImplementedError()
 
-    async def remove(self, connection):
+    async def remove(self, connection: Connection):
         raise NotImplementedError()
 
 
@@ -90,10 +93,14 @@ class EventManager(object):
     point. The connection is no longer active. This can be used for cleaning
     up things.
     """
-    def __init__(self, route_expression):
+    def __init__(self, route_expression: str):
         self.route_expression = route_expression
 
-    def make_default_event(self, connection, route_key=None):
+    def make_default_event(
+        self,
+        connection: Connection,
+        route_key: Optional[str] = None
+    ):
         event = {
             "requestContext": {
                 "connectionId": connection.id,
@@ -123,7 +130,12 @@ class EventManager(object):
 
         return route_key
 
-    def make_event(self, connection, message, route_key=None):
+    def make_event(
+        self,
+        connection: Connection,
+        message: Mapping[str, Any],
+        route_key: Optional[str] = None
+    ):
         event = self.make_default_event(
             connection,
             route_key=route_key
@@ -134,7 +146,7 @@ class EventManager(object):
 
         return DictAttr(event)
 
-    def make_disconnect_event(self, connection):
+    def make_disconnect_event(self, connection: Connection):
         event = self.make_default_event(
             connection,
             route_key='$disconnect'
@@ -144,12 +156,12 @@ class EventManager(object):
 
 class HandlerManager(object):
 
-    def __init__(self, route_expression=None):
+    def __init__(self, route_expression: Optional[str] = None):
         self.handlers = {}
         self.base_handlers = {}
         self.route_expression = route_expression
 
-    def get(self, key):
+    def get(self, key: str) -> Handler:
         if key in self.base_handlers:
             return self.base_handlers[key]
         else:
@@ -157,7 +169,7 @@ class HandlerManager(object):
                 if key == name:
                     return handler
 
-    def add_handler(self, handler, key=None):
+    def add_handler(self, handler: Handler, key: Optional[str] = None):
         if key is None:
             key = handler.name
 
@@ -166,11 +178,11 @@ class HandlerManager(object):
         else:
             self.handlers[handler.name] = handler
 
-    def add_handlers(self, handler_map):
+    def add_handlers(self, handler_map: HandlerMap):
         for key, handler in handler_map.items():
             self.add_handler(handler)
 
-    def get_handler(self, event):
+    def get_handler(self, event: Mapping[str, Any]):
         route_key = event['requestContext']['routeKey']
 
         handler = (

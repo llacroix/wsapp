@@ -32,12 +32,12 @@ async def make_service(ws_endpoint, remote_endpoint):
     handler_map.define("$connect", "/httpws/connect")
     handler_map.define("$disconnect", "/httpws/disconnect")
     handler_map.define("$default", "/httpws/default")
-    # handler_map.define("action.fun", "/httpws/fun")
+    handler_map.define("action.fun", "/httpws/fun")
 
     handlers = HandlerManager()
     handlers.add_handlers(handler_map)
 
-    events = EventManager()
+    events = EventManager("action.{request.body.action}")
 
     application = WebsocketApplication(connections, handlers, events)
 
