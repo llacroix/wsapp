@@ -83,10 +83,10 @@ class RemotedConnectionManager(LocalConnectionManager):
         self.remote_endpoint = remote_endpoint
         self.remote_connections = {}
 
-    async def add_connection(self, connection):
+    async def add(self, connection):
         # Do not add remote connections to local connections
         if not isinstance(connection, RemoteConnection):
-            await super().add_connection(connection)
+            await super().add(connection)
             await self.remote_endpoint.add_connection(connection)
 
     async def get(self, connection_id):

@@ -8,9 +8,6 @@ class Handler(object):
     def call(self, application, event):
         raise NotImplementedError()
 
-    def accept(self, event):
-        raise NotImplementedError()
-
 
 class BasicHandler(Handler):
     def __init__(self, name, func):
@@ -24,9 +21,6 @@ class BasicHandler(Handler):
             return await res
 
         return res
-
-    def accept(self, event):
-        return True
 
 
 class BasicHandlerMap(object):
@@ -52,9 +46,6 @@ class HttpHandler(Handler):
 
     async def call(self, application, event):
         await self.endpoint.send(self.path, event)
-
-    def accept(self, event):
-        return True
 
 
 class HttpHandlerMap(object):

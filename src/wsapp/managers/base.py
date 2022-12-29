@@ -55,6 +55,19 @@ class ConnectionManager(object):
         raise NotImplementedError()
 
 
+class DictAttr(dict):
+    def __getattr__(self, name):
+        try:
+            val = self[name]
+        except KeyError:
+            raise AttributeError(f"Attribute {name} not found")
+
+        if isinstance(val, dict):
+            return DictAttr(val)
+        else:
+            return val
+
+
 class EventManager(object):
     """
     A structure that has for purpose to create Event object relevant
@@ -77,6 +90,9 @@ class EventManager(object):
     point. The connection is no longer active. This can be used for cleaning
     up things.
     """
+    def __init__(self, route_expression):
+        self.route_expression = route_expression
+
     def make_default_event(self, connection, route_key=None):
         event = {
             "requestContext": {
@@ -90,14 +106,22 @@ class EventManager(object):
         if route_key is not None:
             event['requestContext']['routeKey'] = route_key
 
-        return event
+        return DictAttr(event)
 
-    def make_connect_event(self, connection):
+    def make_connect_event(self, request, connection):
         event = self.make_default_event(
             connection,
             route_key='$connect'
         )
-        return event
+        return DictAttr(event)
+
+    def compute_route_key(self, event):
+        try:
+            route_key = self.route_expression.format(request=event)
+        except AttributeError:
+            route_key = "$default"
+
+        return route_key
 
     def make_event(self, connection, message, route_key=None):
         event = self.make_default_event(
@@ -105,14 +129,17 @@ class EventManager(object):
             route_key=route_key
         )
         event['body'] = message.json()
-        return event
+
+        event['requestContext']['routeKey'] = self.compute_route_key(event)
+
+        return DictAttr(event)
 
     def make_disconnect_event(self, connection):
         event = self.make_default_event(
             connection,
             route_key='$disconnect'
         )
-        return event
+        return DictAttr(event)
 
 
 class HandlerManager(object):
@@ -144,16 +171,12 @@ class HandlerManager(object):
             self.add_handler(handler)
 
     def get_handler(self, event):
-        if self.route_expression:
-            route_key = self.route_expression.format(request=event)
-            if route_key in self.handlers:
-                event['requestContext']['routeKey'] = route_key
-                return self.handlers[route_key]
+        route_key = event['requestContext']['routeKey']
 
-        for key, handler in self.handlers.items():
-            if handler.accept(event):
-                event['requestContext']['routeKey'] = key
-                return handler
-        else:
-            event['requestContext']['routeKey'] = '$default'
-            return self.base_handlers['$default']
+        handler = (
+            self.handlers.get(route_key)
+            if route_key in self.handlers
+            else self.base_handlers.get('$default')
+        )
+
+        return handler

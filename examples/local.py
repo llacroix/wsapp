@@ -32,8 +32,12 @@ async def make_service():
         logger.info("Connection %s", conn)
         await conn.send(event['body'])
 
+    @handler_map.define("action-fun")
+    async def fun_action(app, event):
+        logger.info("On Fun %s", event)
+
     handlers = HandlerManager()
-    events = EventManager()
+    events = EventManager("action-{request.body.action}")
     connections = LocalConnectionManager()
     handlers.add_handlers(handler_map)
 

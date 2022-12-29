@@ -17,7 +17,7 @@ class LocalConnectionManager(ConnectionManager):
     def new_connection_id(self):
         return uuid.uuid1().hex
 
-    async def add_connection(self, connection):
+    async def add(self, connection):
         connection.id = self.new_connection_id()
         self.connections[connection.id] = connection
 
