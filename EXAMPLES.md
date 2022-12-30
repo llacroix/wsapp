@@ -49,3 +49,12 @@ a message queue... It is possible to add websocket to virtually any kind of appl
     python example/conn.py # connection server on http://localhost:8004
     python example/remote_handlers.py -p 8000 http://localhost:8004
     python example/remote_handlers.py -p 8001 http://localhost:8004
+
+
+In both examples with the remote connections, when connecting to the websocket on ws://localhost:8000/ws
+or ws://localhost:8001/ws, you can see the connection event on the conn.py server logs. Copy the connection id
+in the event logged to the output and send a message with a similar load:
+
+    '{"connectionId": [connection_id]}'
+
+This will transfer the message to the websocket client with that assigned connection id.

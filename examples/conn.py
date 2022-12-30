@@ -71,7 +71,7 @@ async def make_service(http_endpoint):
         data = await request.json()
 
         if 'conn_id' in data['body']:
-            await send_message(data['body']['conn_id'], data['body'])
+            await send_message(data['body']['connectionId'], data['body'])
 
         logger.info("Handlers %s", data)
 
